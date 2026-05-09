@@ -550,14 +550,21 @@
       }
 
       btnBlue.addEventListener('click', function () {
-        if (btnBlue.disabled) return;
-        btnBlue.disabled = true;
-        btnRed.disabled = true;
-        setCookie(COOKIE_NAME, '1', COOKIE_DAYS);
-        // Karanlığa fade — 1.4s
-        darken.style.display = 'block';
-        darken.classList.add('darken-fade');
-        setTimeout(dismiss, 1500);
+        // Hiçbir yere gitmiyor, cookie de set etmiyor — sadece kısa kırmızı uyarı
+        var existing = document.getElementById('cave-blue-msg');
+        if (existing) return;
+        var msg = document.createElement('p');
+        msg.id = 'cave-blue-msg';
+        msg.textContent = 'Bu yol seni hiçbir yere götürmez. Diğer kapıyı dene.';
+        msg.style.cssText = 'position:absolute;bottom:5rem;left:50%;transform:translateX(-50%);font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:1.15rem;color:#ff8aa1;text-shadow:0 0 18px rgba(220,38,38,0.55);z-index:30;opacity:0;transition:opacity 0.6s;text-align:center;padding:0 1rem;';
+        cave.appendChild(msg);
+        // Fade in
+        requestAnimationFrame(function () { msg.style.opacity = '1'; });
+        // 3.2s sonra fade out + sil
+        setTimeout(function () {
+          msg.style.opacity = '0';
+          setTimeout(function () { msg.remove(); }, 700);
+        }, 3200);
       });
 
       btnRed.addEventListener('click', function () {
@@ -1389,13 +1396,6 @@
        ──────────────────────────────────────────────────────────────── */
     const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
     const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY-HERE';
-
-    /* ────────────────────────────────────────────────────────────────
-       FİYAT — Buraya yazınca yukarıda otomatik gözükür.
-       ──────────────────────────────────────────────────────────────── */
-    const PRICE_TL = '—'; // örn. '2.400'
-
-    document.getElementById('price-display').textContent = PRICE_TL;
 
     /* ────────────────────────────────────────────────────────────────
        FİLOZOF CAROUSEL — 8 filozof, döngüsel
