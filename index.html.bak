@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeoAgora — Felsefe Atölyesi · 28 Haziran'da Başlıyor</title>
+  <meta name="description" content="8 hafta, 8 filozof. Düşünmeyi hatırlatacak hibrit bir felsefe atölyesi. Her Cumartesi 14:00. Kontenjan sınırlı." />
+  <meta name="theme-color" content="#0e141b" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="NeoAgora — Felsefe Atölyesi" />
+  <meta property="og:description" content="8 hafta, 8 filozof. 28 Haziran 2026'da başlıyor. Cumartesi 14:00, online + fiziksel." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="tr_TR" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind via CDN (sadece reklam sayfası için yeterli) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#00d4ff',
+            secondary: '#6edab4',
+            tertiary: '#feb528',
+            danger: '#ff4d6d',
+            bg: '#0e141b',
+            surface: '#1a232b',
+            'surface-2': '#22303a',
+            outline: '#3c494e',
+            text: '#f3f7fa',          /* daha parlak beyaza yakın */
+            'text-dim': '#cdd6dd',    /* gri yerine açık gri-beyaz, kontrast yüksek */
+            'text-muted': '#9aa9b3',  /* eskiden text-dim olan ton — sadece çok pasif yerlerde */
+          },
+          fontFamily: {
+            headline: ['Cormorant Garamond', 'serif'],
+            body: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['Space Mono', 'ui-monospace', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Supabase JS (form submit için) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --primary: #00d4ff;
+      --secondary: #6edab4;
+      --tertiary: #feb528;
+      --bg: #0e141b;
+      --surface: #1a232b;
+      --text: #e7eef3;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: #f3f7fa;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Paragraflar biraz daha kalın ve daha okunaklı renk — uzun metinlerde göz yormasın */
+    p, li {
+      font-weight: 400;
+      letter-spacing: 0.005em;
+    }
+    /* text-text-dim ile renklendirilmiş paragraflarda kontrast yükselsin */
+    .text-text-dim {
+      color: #cdd6dd !important;
+    }
+    /* Scrollbar gizle (nav overflow için) */
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { scrollbar-width: none; }
+
+    /* Global background — Athens cyberpunk */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(0, 212, 255, 0.10), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(254, 181, 40, 0.06), transparent 50%),
+        linear-gradient(180deg, #0e141b 0%, #0a0f15 100%);
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(0, 212, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* Tech notch — cyberpunk corner cut */
+    .tech-notch {
+      clip-path: polygon(
+        12px 0,
+        100% 0,
+        100% calc(100% - 12px),
+        calc(100% - 12px) 100%,
+        0 100%,
+        0 12px
+      );
+    }
+
+    /* Neon shadow utilities */
+    .neon-cyan { box-shadow: 0 0 20px rgba(0, 212, 255, 0.45), 0 0 40px rgba(0, 212, 255, 0.15); }
+    .neon-cyan-soft { box-shadow: 0 0 14px rgba(0, 212, 255, 0.18); }
+    .neon-text { text-shadow: 0 0 12px rgba(0, 212, 255, 0.55); }
+    .neon-text-gold { text-shadow: 0 0 14px rgba(254, 181, 40, 0.55); }
+
+    /* Pulse for live indicator */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+
+    /* Subtle hud blink for badges */
+    @keyframes hud-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+    .hud-blink { animation: hud-blink 2.4s ease-in-out infinite; }
+
+    /* Reveal on enter */
+    @keyframes float-up {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .float-up { animation: float-up 0.8s ease-out backwards; }
+
+    /* Scroll cue — yavaş zıplayan ok */
+    @keyframes bounce-slow {
+      0%, 100% { transform: translateY(0); opacity: 0.6; }
+      50%      { transform: translateY(8px); opacity: 1; }
+    }
+    .animate-bounce-slow { animation: bounce-slow 2.2s ease-in-out infinite; }
+    .scroll-cue { animation: float-up 0.8s ease-out backwards; animation-delay: 1.0s; }
+
+    /* Hero gradient mesh accent */
+    .hero-mesh {
+      background:
+        radial-gradient(circle at 30% 20%, rgba(0, 212, 255, 0.18), transparent 45%),
+        radial-gradient(circle at 80% 60%, rgba(110, 218, 180, 0.12), transparent 40%),
+        radial-gradient(circle at 50% 100%, rgba(254, 181, 40, 0.08), transparent 50%);
+    }
+
+    /* Glassmorphism card */
+    .glass {
+      background: rgba(26, 35, 43, 0.55);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    /* Form input cyberpunk look */
+    .field {
+      background: rgba(14, 20, 27, 0.6);
+      border: 1px solid rgba(60, 73, 78, 0.45);
+      transition: border-color 200ms, box-shadow 200ms;
+    }
+    .field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+      outline: none;
+    }
+
+    /* Format radio cards */
+    .format-card input:checked + label {
+      border-color: var(--primary);
+      background: rgba(0, 212, 255, 0.08);
+      box-shadow: 0 0 0 1px var(--primary), 0 0 20px rgba(0, 212, 255, 0.2);
+    }
+    .format-card input:checked + label .ring-dot {
+      background: var(--primary);
+      box-shadow: 0 0 8px var(--primary);
+    }
+
+    /* Marquee fallback for trust strip */
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .marquee { animation: marquee 40s linear infinite; }
+
+    /* Hexagon clip for philosopher portrait */
+    .hex {
+      clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+    }
+
+    /* Carousel filozof fotoğrafı — kafa hexagon'un dar tepesine değmesin */
+    #phil-photo {
+      object-fit: cover;
+      object-position: 50% 22%;          /* daha çok üst kısım gösterilsin */
+      transform: scale(1.08) translateY(8%); /* hafifçe büyüt + aşağı kaydır */
+      transform-origin: center center;
+    }
+
+    /* Hover lift */
+    .lift { transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease; }
+    .lift:hover { transform: translateY(-3px); }
+
+    /* Number counter look */
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    /* CTA button base */
+    .cta {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.95rem 1.6rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 700;
+      border-radius: 2px;
+      transition: all 200ms ease;
+    }
+    .cta-primary {
+      background: var(--primary);
+      color: #001318;
+      box-shadow: 0 0 24px rgba(0, 212, 255, 0.45);
+    }
+    .cta-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 36px rgba(0, 212, 255, 0.7);
+    }
+    .cta-ghost {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid rgba(0, 212, 255, 0.4);
+    }
+    .cta-ghost:hover {
+      background: rgba(0, 212, 255, 0.08);
+      border-color: var(--primary);
+    }
+
+    /* Toast / status */
+    .status-ok { background: rgba(110, 218, 180, 0.1); border-color: rgba(110, 218, 180, 0.45); color: var(--secondary); }
+    .status-err { background: rgba(255, 77, 109, 0.08); border-color: rgba(255, 77, 109, 0.4); color: #ff8aa1; }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SABİT TOPBAR
+       ═══════════════════════════════════════════════════════════════ -->
+  <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-bg/85 border-b border-outline/30">
+    <div class="max-w-6xl mx-auto px-5 py-3 flex items-center justify-between gap-4">
+      <a href="#top" class="flex items-center gap-2 group shrink-0">
+        <span class="w-2 h-2 bg-primary rounded-full pulse-dot"></span>
+        <span class="font-mono text-xs tracking-[0.3em] text-primary group-hover:text-secondary transition-colors">NEOAGORA</span>
+      </a>
+      <div class="flex items-center gap-4 lg:gap-5 min-w-0 overflow-x-auto scrollbar-none">
+        <a href="#nedir"    class="hidden md:inline font-mono text-[10px] uppercase tracking-[0.2em] text-text hover:text-primary transition-colors whitespace-nowrap">Nedir?</a>
+        <a href="#program"  class="hidden md:inline font-mono text-[10px] uppercase tracking-[0.2em] text-text hover:text-primary transition-colors whitespace-nowrap">Program</a>
+        <a href="#akis"     class="hidden md:inline font-mono text-[10px] uppercase tracking-[0.2em] text-text hover:text-primary transition-colors whitespace-nowrap">Akış</a>
+        <a href="#uygulama" class="hidden md:inline font-mono text-[10px] uppercase tracking-[0.2em] text-text hover:text-primary transition-colors whitespace-nowrap">Uygulama</a>
+        <a href="#kim"      class="hidden lg:inline font-mono text-[10px] uppercase tracking-[0.2em] text-text hover:text-primary transition-colors whitespace-nowrap">Kim İçin</a>
+        <a href="#yatirim"  class="hidden lg:inline font-mono text-[10px] uppercase tracking-[0.2em] text-text hover:text-primary transition-colors whitespace-nowrap">Yatırım</a>
+        <a href="#sss"      class="hidden md:inline font-mono text-[10px] uppercase tracking-[0.2em] text-text hover:text-primary transition-colors whitespace-nowrap">SSS</a>
+        <a href="#kayit" class="cta cta-primary !py-2 !px-4 !text-[10px] shrink-0">Kayıt Ol →</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       HERO (2 KOLON — sol: copy, sağ: filozof carousel)
+       ═══════════════════════════════════════════════════════════════ -->
+  <header id="top" class="relative pt-28 pb-16 md:pt-36 md:pb-24 hero-mesh overflow-hidden">
+    <div class="max-w-6xl mx-auto px-5 relative z-10 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-start">
+
+      <!-- ─────── SOL KOLON: COPY ─────── -->
+      <div class="min-w-0">
+        <!-- Eyebrow -->
+        <div class="float-up flex items-center gap-3 mb-5">
+          <span class="w-1.5 h-1.5 bg-secondary rounded-full pulse-dot"></span>
+          <span class="font-mono text-[10px] tracking-[0.4em] uppercase text-secondary">
+            ATÖLYE_v1.0 // KÖKLERE YOLCULUK
+          </span>
+        </div>
+
+        <!-- Title -->
+        <h1 class="float-up font-headline italic text-5xl md:text-6xl lg:text-7xl leading-[1.05] mb-6" style="animation-delay: .15s;">
+          Sokrates'i okumak<br />
+          <span class="text-primary neon-text">yetmez.</span>
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="float-up text-lg md:text-xl text-text-dim leading-relaxed mb-8 max-w-xl" style="animation-delay: .3s;">
+          8 hafta. 8 filozof. <span class="text-text">Sofi'nin Dünyası'ndan</span> ilhamla,
+          düşünmeyi hatırlatacak hibrit bir atölye.
+        </p>
+
+        <!-- Date / time / format chip — 3 hücreli grid: tek satırda kalır, eşit dağılır -->
+        <div class="float-up glass tech-notch grid grid-cols-1 sm:grid-cols-3 items-stretch px-5 py-5 md:px-6 md:py-5 mb-8 w-full max-w-2xl" style="animation-delay: .45s;">
+          <div class="flex items-center gap-3 px-2 sm:px-3">
+            <svg class="w-5 h-5 md:w-6 md:h-6 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <div class="min-w-0">
+              <div class="font-mono text-[10px] uppercase tracking-widest text-text-dim mb-1">Başlangıç</div>
+              <div class="font-headline italic text-lg md:text-xl leading-none truncate">28 Haziran 2026</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 px-2 sm:px-3 border-y sm:border-y-0 sm:border-x border-outline/40 py-3 sm:py-0 my-3 sm:my-0">
+            <svg class="w-5 h-5 md:w-6 md:h-6 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <div class="min-w-0">
+              <div class="font-mono text-[10px] uppercase tracking-widest text-text-dim mb-1">Cumartesi</div>
+              <div class="font-headline italic text-lg md:text-xl leading-none truncate">14:00 — 16:00</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 px-2 sm:px-3">
+            <svg class="w-5 h-5 md:w-6 md:h-6 text-primary shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <div class="min-w-0">
+              <div class="font-mono text-[10px] uppercase tracking-widest text-text-dim mb-1">Format</div>
+              <div class="font-headline italic text-lg md:text-xl leading-none truncate">Hibrit</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTAs -->
+        <div class="float-up flex flex-col sm:flex-row gap-3" style="animation-delay: .6s;">
+          <a href="#kayit" class="cta cta-primary">
+            Kayıt Formuna Git
+            <span aria-hidden="true">→</span>
+          </a>
+          <a href="#program" class="cta cta-ghost">8 Haftayı İncele</a>
+        </div>
+
+        <!-- Kontenjan — CTA'lardan biraz nefes alacak şekilde uzakta -->
+        <div class="float-up mt-10 flex items-center gap-3" style="animation-delay: .7s;">
+          <span class="w-10 h-px bg-primary/60"></span>
+          <span class="font-mono text-xs md:text-sm tracking-widest uppercase font-bold text-primary">
+            Kontenjan sınırlıdır — Hemen yerini ayırt
+          </span>
+        </div>
+
+        <!-- Scroll cue — ok tam yazının altında, "akış" kelimesinin hizasında merkezleniyor -->
+        <a href="#nedir" class="float-up mt-12 md:mt-16 lg:mt-20 inline-grid grid-cols-[auto_auto] items-center gap-x-3 gap-y-3 group" style="animation-delay: .85s;" aria-label="Aşağı kaydır">
+          <span class="w-10 h-px bg-text-dim/40 self-center"></span>
+          <span class="font-mono text-xs md:text-sm tracking-widest uppercase text-text-dim group-hover:text-text transition-colors">
+            Aşağıda program · akış · uygulama · kayıt
+          </span>
+          <span></span>
+          <span class="flex justify-center">
+            <svg class="w-7 h-7 md:w-8 md:h-8 text-primary animate-bounce-slow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M19 12l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </a>
+      </div>
+
+      <!-- ─────── SAĞ KOLON: FİLOZOF CAROUSEL ─────── -->
+      <aside class="float-up relative" style="animation-delay: .35s;">
+        <div class="flex flex-col items-center">
+
+          <!-- Üst mini-meta -->
+          <div class="w-full flex items-center justify-between mb-4 font-mono text-[9px] uppercase tracking-[0.3em] text-text-dim">
+            <span class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-primary rounded-full pulse-dot"></span>
+              CANLI ARŞİV
+            </span>
+            <span id="phil-counter">01 / 08</span>
+          </div>
+
+          <!-- Hexagonal foto + nav butonları -->
+          <div class="relative w-full">
+            <!-- Önceki buton -->
+            <button id="phil-prev" type="button" aria-label="Önceki filozof"
+              class="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 grid place-items-center bg-bg/70 border border-outline/40 hover:border-primary/60 hover:bg-primary/10 transition-colors backdrop-blur-sm">
+              <span class="text-xl text-text-dim group-hover:text-primary">‹</span>
+            </button>
+            <!-- Sonraki buton -->
+            <button id="phil-next" type="button" aria-label="Sonraki filozof"
+              class="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 grid place-items-center bg-bg/70 border border-primary/60 hover:bg-primary/20 hover:shadow-[0_0_20px_rgba(0,212,255,0.4)] transition-all backdrop-blur-sm">
+              <span class="text-xl text-primary">›</span>
+            </button>
+
+            <!-- Hexagonal photo frame -->
+            <div class="mx-auto w-72 h-72 md:w-80 md:h-80 relative">
+              <!-- Hexagon outer glow -->
+              <div class="hex absolute inset-0 bg-gradient-to-br from-primary via-secondary/60 to-tertiary/40 opacity-90"></div>
+              <!-- Inner hex with photo -->
+              <div class="hex absolute inset-[3px] overflow-hidden bg-bg">
+                <img id="phil-photo" src="philosophers/platon.png" alt="Platon"
+                  class="w-full h-full object-cover transition-opacity duration-500" />
+                <!-- Cyan tint overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-transparent pointer-events-none"></div>
+              </div>
+              <!-- Sol-üst meta rozet -->
+              <div class="absolute -top-2 -left-2 z-10 px-2 py-1 bg-bg border border-primary/50 font-mono text-[8px] uppercase tracking-widest text-primary">
+                <span id="phil-week">MOD_01</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- İsim + bilgi -->
+          <div class="text-center mt-5">
+            <div class="font-mono text-[9px] uppercase tracking-[0.3em] text-text-dim mb-1" id="phil-era">
+              ANTİK
+            </div>
+            <h2 class="font-headline italic text-3xl md:text-4xl text-text" id="phil-name">
+              Platon
+            </h2>
+            <div class="font-mono text-[10px] text-text-dim mt-1" id="phil-meta">
+              İÖ 427–347 · İdealar Kuramı
+            </div>
+          </div>
+
+          <!-- Alıntı kartı -->
+          <div class="w-full mt-6 glass tech-notch p-5 border-l-2 border-primary/60">
+            <div class="font-mono text-[8px] uppercase tracking-widest text-primary/60 mb-2">
+              ALINTI / QUOTE
+            </div>
+            <blockquote id="phil-quote" class="font-headline italic text-base md:text-lg leading-snug text-text">
+              Karanlıktan korkan bir çocuğu kolayca affedebiliriz; hayattaki gerçek trajedi, yetişkinlerin ışıktan korkmasıdır.
+            </blockquote>
+          </div>
+
+          <!-- Davet mesajı — sıcak altın renk, kalın gövde ile okunaklı -->
+          <div class="w-full mt-5 text-center">
+            <p class="font-body text-sm md:text-base font-semibold tracking-wide" style="color: #ffd479;">
+              <span id="phil-name-2">Platon</span>, NeoAgora'da seninle konuşmak için bekliyor olacak.
+            </p>
+            <p class="mt-2 font-headline italic text-2xl md:text-3xl text-primary neon-text">
+              Sen neredesin?
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       NEOAGORA NEDİR?
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="nedir" class="py-24 md:py-32 scroll-mt-20">
+    <div class="max-w-4xl mx-auto px-5">
+      <div class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/70 mb-4">
+        // 01 — NEOAGORA NEDİR?
+      </div>
+      <h2 class="font-headline italic text-4xl md:text-6xl leading-tight mb-10">
+        Bir derste oturup not almak değil.<br />
+        <span class="text-text-dim">Düşünmeyi yeniden hatırlamak.</span>
+      </h2>
+
+      <div class="space-y-6 text-lg md:text-xl leading-relaxed text-text-dim">
+        <p>
+          NeoAgora, Antik Yunan'ın <em class="text-text not-italic font-medium">agora</em>'sını
+          —yani halkın toplanıp tartıştığı meydanı— dijital çağa taşıyan sokratik bir atölye.
+        </p>
+        <p>
+          Her hafta salı akşamı sana <span class="text-text">haftanın ufuk açıcı 4 sorusu</span> gelir.
+          Cumartesi'ye kadar kendi cevaplarını <span class="text-primary">Ulak</span> ile bize ulaştırırsın.
+          Cumartesi 14:00'te <span class="text-text">agorada toplanırız</span> ve tartışmayı alevlendiririz.
+          Atölye sona erdiğinde ise <span class="text-tertiary">dirilttiğimiz filozofumuz</span> tüm hafta
+          boyunca senin sorularını bekliyor olacak.
+        </p>
+        <p>
+          Akademik bir ders değil bu. Bir <span class="text-primary">düşünme alışkanlığı laboratuvarı</span>.
+          8 hafta sonunda Platon'un mağarasından Kant'ın imperatifine kadar uzanan bir yolculuk yapmış olacaksın
+          — ama önemli olan vardığın yer değil, yolda kazandığın <em class="text-text">soru sorma kası</em>.
+        </p>
+      </div>
+
+      <!-- Stats — Nedir bölümünün ALTINDA artık -->
+      <div class="mt-14 pt-10 border-t border-outline/30 grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="text-center">
+          <div class="stat-num text-5xl text-primary">8</div>
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-text mt-2">Filozof</div>
+        </div>
+        <div class="text-center">
+          <div class="stat-num text-5xl text-secondary">8</div>
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-text mt-2">Hafta</div>
+        </div>
+        <div class="text-center">
+          <div class="stat-num text-5xl text-tertiary">32</div>
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-text mt-2">Soru</div>
+        </div>
+        <div class="text-center">
+          <div class="stat-num text-5xl text-primary">∞</div>
+          <div class="font-mono text-[10px] uppercase tracking-[0.3em] text-text mt-2">Diyalog</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PROGRAM — HAFTA HAFTA
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="program" class="py-24 bg-surface/30 border-y border-outline/30 scroll-mt-20">
+    <div class="max-w-6xl mx-auto px-5">
+      <div class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/70 mb-4">
+        // 02 — 8 HAFTALIK MÜFREDAT
+      </div>
+      <h2 class="font-headline italic text-4xl md:text-6xl leading-tight mb-4">
+        Köklere Yolculuk.
+      </h2>
+      <p class="text-text-dim text-lg max-w-2xl mb-14">
+        Antik Yunan'dan Aydınlanma'ya. Her hafta bir filozof, bir kavram, bir gündelik soru.
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <!-- W01 -->
+        <article class="glass tech-notch p-6 lift hover:border-primary/40">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="font-mono text-[9px] uppercase tracking-widest text-primary/70">MOD_01 // ANTİK</div>
+              <h3 class="font-headline italic text-2xl mt-1">Platon</h3>
+              <div class="font-mono text-[10px] text-text-dim mt-1">İÖ 427–347 · İdealar Kuramı</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] uppercase tracking-widest text-text-dim">Cumartesi</div>
+              <div class="font-headline italic text-lg text-primary">28 Haziran</div>
+            </div>
+          </div>
+          <p class="text-text-dim italic text-sm leading-relaxed border-l-2 border-primary/40 pl-3">
+            "Bütün atlar neden aynıdır?" — Görünenin ardındaki kalıcı formu sorgulamak.
+          </p>
+        </article>
+
+        <!-- W02 -->
+        <article class="glass tech-notch p-6 lift hover:border-primary/40">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="font-mono text-[9px] uppercase tracking-widest text-primary/70">MOD_02 // ANTİK</div>
+              <h3 class="font-headline italic text-2xl mt-1">Aristoteles</h3>
+              <div class="font-mono text-[10px] text-text-dim mt-1">İÖ 384–322 · Altın Orta &amp; Teleoloji</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] uppercase tracking-widest text-text-dim">Cumartesi</div>
+              <div class="font-headline italic text-lg text-primary">5 Temmuz</div>
+            </div>
+          </div>
+          <p class="text-text-dim italic text-sm leading-relaxed border-l-2 border-primary/40 pl-3">
+            Erdem nedir, alışkanlıkla mı gelir? Mutluluğun (eudaimonia) gündelik tarifi.
+          </p>
+        </article>
+
+        <!-- W03 -->
+        <article class="glass tech-notch p-6 lift hover:border-primary/40">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="font-mono text-[9px] uppercase tracking-widest text-primary/70">MOD_03 // RASYONALİZM</div>
+              <h3 class="font-headline italic text-2xl mt-1">René Descartes</h3>
+              <div class="font-mono text-[10px] text-text-dim mt-1">1596–1650 · Cogito Ergo Sum</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] uppercase tracking-widest text-text-dim">Cumartesi</div>
+              <div class="font-headline italic text-lg text-primary">12 Temmuz</div>
+            </div>
+          </div>
+          <p class="text-text-dim italic text-sm leading-relaxed border-l-2 border-primary/40 pl-3">
+            Her şeyden şüphe ettiğinde geriye ne kalıyor? Modern zihnin doğum anı.
+          </p>
+        </article>
+
+        <!-- W04 -->
+        <article class="glass tech-notch p-6 lift hover:border-primary/40">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="font-mono text-[9px] uppercase tracking-widest text-primary/70">MOD_04 // PANTEİZM</div>
+              <h3 class="font-headline italic text-2xl mt-1">Baruch Spinoza</h3>
+              <div class="font-mono text-[10px] text-text-dim mt-1">1632–1677 · Tek Töz</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] uppercase tracking-widest text-text-dim">Cumartesi</div>
+              <div class="font-headline italic text-lg text-primary">19 Temmuz</div>
+            </div>
+          </div>
+          <p class="text-text-dim italic text-sm leading-relaxed border-l-2 border-primary/40 pl-3">
+            Tanrı, doğa, sen — ayrı şeyler mi yoksa aynı bütünün yüzleri mi?
+          </p>
+        </article>
+
+        <!-- W05 -->
+        <article class="glass tech-notch p-6 lift hover:border-primary/40">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="font-mono text-[9px] uppercase tracking-widest text-primary/70">MOD_05 // EMPİRİZM</div>
+              <h3 class="font-headline italic text-2xl mt-1">John Locke</h3>
+              <div class="font-mono text-[10px] text-text-dim mt-1">1632–1704 · Tabula Rasa</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] uppercase tracking-widest text-text-dim">Cumartesi</div>
+              <div class="font-headline italic text-lg text-primary">26 Temmuz</div>
+            </div>
+          </div>
+          <p class="text-text-dim italic text-sm leading-relaxed border-l-2 border-primary/40 pl-3">
+            Doğduğunda zihnin boş bir levha mıydı? Deneyim, ne kadarını yazdı?
+          </p>
+        </article>
+
+        <!-- W06 -->
+        <article class="glass tech-notch p-6 lift hover:border-primary/40">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="font-mono text-[9px] uppercase tracking-widest text-primary/70">MOD_06 // EMPİRİZM</div>
+              <h3 class="font-headline italic text-2xl mt-1">David Hume</h3>
+              <div class="font-mono text-[10px] text-text-dim mt-1">1711–1776 · Alışkanlık &amp; Nedensellik</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] uppercase tracking-widest text-text-dim">Cumartesi</div>
+              <div class="font-headline italic text-lg text-primary">2 Ağustos</div>
+            </div>
+          </div>
+          <p class="text-text-dim italic text-sm leading-relaxed border-l-2 border-primary/40 pl-3">
+            Yarın güneş yine doğacak diyebilir miyiz? Bilgi nereye kadar kesin?
+          </p>
+        </article>
+
+        <!-- W07 -->
+        <article class="glass tech-notch p-6 lift hover:border-primary/40">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="font-mono text-[9px] uppercase tracking-widest text-primary/70">MOD_07 // İDEALİZM</div>
+              <h3 class="font-headline italic text-2xl mt-1">George Berkeley</h3>
+              <div class="font-mono text-[10px] text-text-dim mt-1">1685–1753 · Esse est percipi</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] uppercase tracking-widest text-text-dim">Cumartesi</div>
+              <div class="font-headline italic text-lg text-primary">9 Ağustos</div>
+            </div>
+          </div>
+          <p class="text-text-dim italic text-sm leading-relaxed border-l-2 border-primary/40 pl-3">
+            Bir şey sen onu görmediğinde gerçekten orada mı? Algı, varlığın koşulu mu?
+          </p>
+        </article>
+
+        <!-- W08 -->
+        <article class="glass tech-notch p-6 lift hover:border-tertiary/60 relative">
+          <div class="absolute top-3 right-3 font-mono text-[8px] uppercase tracking-widest text-tertiary border border-tertiary/40 px-2 py-0.5">
+            FİNAL
+          </div>
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="font-mono text-[9px] uppercase tracking-widest text-tertiary">MOD_08 // AYDINLANMA</div>
+              <h3 class="font-headline italic text-2xl mt-1">Immanuel Kant</h3>
+              <div class="font-mono text-[10px] text-text-dim mt-1">1724–1804 · Kategorik İmperatif</div>
+            </div>
+            <div class="text-right">
+              <div class="font-mono text-[9px] uppercase tracking-widest text-text-dim">Cumartesi</div>
+              <div class="font-headline italic text-lg text-tertiary">16 Ağustos</div>
+            </div>
+          </div>
+          <p class="text-text-dim italic text-sm leading-relaxed border-l-2 border-tertiary/40 pl-3">
+            Ahlaklı davranışın evrensel bir formülü var mı? Akıl, vicdanın tasarımcısı mı?
+          </p>
+        </article>
+      </div>
+
+      <p class="text-center font-mono text-[10px] uppercase tracking-[0.3em] text-text-dim mt-12">
+        * Müfredat zaman zaman değişebilir — özü korunur.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       HAFTANIN AKIŞI — Salı 18:00 → Cumartesi 14:00 → Sonrası
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="akis" class="py-24 scroll-mt-20">
+    <div class="max-w-5xl mx-auto px-5">
+      <div class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/70 mb-4">
+        // 03 — HAFTANIN AKIŞI
+      </div>
+      <h2 class="font-headline italic text-4xl md:text-6xl leading-tight mb-4">
+        Önce soru gelir.<br />
+        <span class="text-text-dim">Sonra konuşuruz.</span>
+      </h2>
+      <p class="text-text-dim text-lg max-w-2xl mb-12">
+        Klasik bir derste değiliz — filozofla karşılaşmadan önce kendi cevabını yazmış olursun.
+        Atölyede oturup mektup doldurmuyoruz; mektubun zaten önünde, üzerinden konuşuyoruz.
+      </p>
+
+      <!-- Timeline — 4 adım -->
+      <div class="relative">
+        <!-- Sol kenarda dikey çizgi -->
+        <div class="absolute left-6 md:left-8 top-4 bottom-4 w-px bg-gradient-to-b from-primary via-secondary to-tertiary opacity-60 pointer-events-none"></div>
+
+        <div class="space-y-6">
+          <!-- 1. SALI 18:00 -->
+          <div class="relative pl-16 md:pl-20">
+            <div class="absolute left-0 top-2 w-12 md:w-16 h-12 md:h-16 grid place-items-center bg-bg border-2 border-primary rounded-full neon-cyan-soft">
+              <span class="font-mono text-[10px] md:text-xs text-primary font-bold">SALI</span>
+            </div>
+            <div class="glass tech-notch p-5 md:p-6">
+              <div class="flex flex-wrap items-baseline gap-3 mb-2">
+                <span class="font-mono text-[10px] uppercase tracking-widest text-primary">18:00</span>
+                <span class="font-mono text-[9px] uppercase tracking-widest text-text-dim">→ HAFTA AÇILIŞI</span>
+              </div>
+              <h3 class="font-headline italic text-2xl mb-2">Haftanın 4 sorusu sana gelir</h3>
+              <p class="text-text-dim text-sm md:text-base leading-relaxed">
+                Salı akşamı tam 18:00'de uygulamada yeni hafta açılır. Filozof tanıtılır, ufuk açan
+                4 soru önüne düşer — kısa ve samimi, akademik bir ödev gibi değil.
+              </p>
+            </div>
+          </div>
+
+          <!-- 2. SALI–CUMA -->
+          <div class="relative pl-16 md:pl-20">
+            <div class="absolute left-0 top-2 w-12 md:w-16 h-12 md:h-16 grid place-items-center bg-bg border-2 border-secondary rounded-full">
+              <span class="font-mono text-[9px] md:text-[10px] text-secondary font-bold leading-tight text-center">SAL<br/>CUM</span>
+            </div>
+            <div class="glass tech-notch p-5 md:p-6">
+              <div class="flex flex-wrap items-baseline gap-3 mb-2">
+                <span class="font-mono text-[10px] uppercase tracking-widest text-secondary">4 GÜN</span>
+                <span class="font-mono text-[9px] uppercase tracking-widest text-text-dim">→ KENDİ ZAMANIN</span>
+              </div>
+              <h3 class="font-headline italic text-2xl mb-2">Mektubunu yazarsın</h3>
+              <p class="text-text-dim text-sm md:text-base leading-relaxed">
+                Salı'dan Cumartesi öğlene kadar kendi cevabını yazma süren var. Kafan rahat, telefonda
+                ya da bilgisayarda. Takıldığında <span class="text-primary">dijital Ulak</span> ile —
+                yapay zekâ destekli filozof yardımcısıyla — sohbet edebilirsin. Mektubun atölyeye
+                hazır olarak gelir.
+              </p>
+            </div>
+          </div>
+
+          <!-- 3. CUMARTESİ 14:00–16:00 -->
+          <div class="relative pl-16 md:pl-20">
+            <div class="absolute left-0 top-2 w-12 md:w-16 h-12 md:h-16 grid place-items-center bg-bg border-2 border-tertiary rounded-full" style="box-shadow: 0 0 18px rgba(254,181,40,0.25);">
+              <span class="font-mono text-[9px] md:text-[10px] text-tertiary font-bold leading-tight text-center">CMT<br/>14:00</span>
+            </div>
+            <div class="glass tech-notch p-5 md:p-6 border-tertiary/40">
+              <div class="flex flex-wrap items-baseline gap-3 mb-2">
+                <span class="font-mono text-[10px] uppercase tracking-widest text-tertiary">14:00 — 16:00</span>
+                <span class="font-mono text-[9px] uppercase tracking-widest text-text-dim">→ ATÖLYE</span>
+              </div>
+              <h3 class="font-headline italic text-2xl mb-2">Atölyede konuşuruz</h3>
+              <p class="text-text-dim text-sm md:text-base leading-relaxed">
+                Mektubunla geliyorsun. Sokratik diyalog: eğitmen soru atar, sen cevap verirsin,
+                cevabına bir soru daha gelir. Kimse "doğru cevap" peşinde değil — düşüncenin
+                kendi mantığı içinde nereye varacağını birlikte takip ediyoruz. Online bağlananlar
+                Zoom üzerinden, fizikselde olanlar masada.
+              </p>
+            </div>
+          </div>
+
+          <!-- 4. CUMARTESİ SONRASI -->
+          <div class="relative pl-16 md:pl-20">
+            <div class="absolute left-0 top-2 w-12 md:w-16 h-12 md:h-16 grid place-items-center bg-bg border-2 border-primary/60 rounded-full">
+              <span class="font-mono text-[9px] md:text-[10px] text-primary font-bold leading-tight text-center">SON<br/>RASI</span>
+            </div>
+            <div class="glass tech-notch p-5 md:p-6">
+              <div class="flex flex-wrap items-baseline gap-3 mb-2">
+                <span class="font-mono text-[10px] uppercase tracking-widest text-primary">7/24</span>
+                <span class="font-mono text-[9px] uppercase tracking-widest text-text-dim">→ DEVAM</span>
+              </div>
+              <h3 class="font-headline italic text-2xl mb-2">Filozof yanında kalır</h3>
+              <p class="text-text-dim text-sm md:text-base leading-relaxed">
+                Atölye bitse de filozof gitmiyor. <span class="text-primary">Dijital Ulak</span>
+                ile haftanın filozofuyla sohbet edebilirsin: ne sorduysan, hangi açıdan bakmak
+                istediysen. Yol haritan da uygulamada açık duruyor — bir önceki haftalara dönüp
+                kendi notlarını gözden geçirebilirsin.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sofi'nin modeli imajı, alt nota -->
+      <p class="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-text-dim/70">
+        ✦ Önce soru, sonra diyalog — klasik felsefe romanı modeli, dijital çağda
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       UYGULAMA — Dijital tarafın 3 ekranı (yol haritası · mektup · ulak)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="uygulama" class="py-24 bg-surface/30 border-y border-outline/30 scroll-mt-20">
+    <div class="max-w-6xl mx-auto px-5">
+      <div class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/70 mb-4">
+        // 04 — DİJİTAL TARAF
+      </div>
+      <h2 class="font-headline italic text-4xl md:text-6xl leading-tight mb-4">
+        Atölye 2 saat,<br />
+        <span class="text-text-dim">arşivin 8 hafta açık.</span>
+      </h2>
+      <p class="text-text-dim text-lg max-w-2xl mb-14">
+        Cumartesi atölyesinin yanına özel bir uygulama geliyor — yol haritan, mektupların ve
+        7/24 sohbet edebileceğin yapay zekâ destekli "Ulak" buradan akıyor.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-5">
+
+        <!-- ─────── 1) YOL HARİTASI ─────── -->
+        <article class="glass tech-notch overflow-hidden lift">
+          <!-- Mockup -->
+          <div class="aspect-[3/4] bg-gradient-to-b from-bg via-surface/50 to-bg p-4 border-b border-outline/20 relative overflow-hidden">
+            <!-- TopBar -->
+            <div class="flex items-center justify-between mb-4 pb-2 border-b border-outline/20">
+              <div class="flex items-center gap-1.5">
+                <span class="w-1 h-1 bg-primary rounded-full"></span>
+                <span class="font-mono text-[7px] tracking-[0.3em] text-primary">NEOAGORA</span>
+              </div>
+              <span class="font-mono text-[7px] text-text-dim">SYS_ACTIVE</span>
+            </div>
+            <div class="font-mono text-[7px] uppercase tracking-widest text-primary/60 mb-1">SYS_STATUS: ACTIVE</div>
+            <div class="font-headline italic text-base text-text mb-1">Hakikat Eşiği</div>
+            <div class="flex justify-between items-center mb-3">
+              <span class="font-mono text-[7px] text-text-dim">PROGRAM_A · KÖKLERE YOLCULUK</span>
+              <span class="font-mono text-sm font-bold text-primary">37%</span>
+            </div>
+            <!-- Progress bar -->
+            <div class="h-1 bg-outline/40 mb-4 relative">
+              <div class="h-full bg-primary" style="width: 37%; box-shadow: 0 0 8px rgba(0,212,255,0.6);"></div>
+            </div>
+            <!-- Timeline nodes -->
+            <div class="space-y-2 relative">
+              <div class="absolute left-3 top-3 bottom-3 w-px bg-gradient-to-b from-secondary via-primary to-outline/30"></div>
+              <!-- W1 done -->
+              <div class="flex items-center gap-2 relative pl-1">
+                <div class="hex w-6 h-6 bg-secondary/60 grid place-items-center shrink-0">
+                  <span class="font-mono text-[6px] text-bg font-bold">01</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-mono text-[7px] text-secondary/70">MOD_01 ✓</div>
+                  <div class="font-headline italic text-[11px] text-secondary truncate">Platon</div>
+                </div>
+              </div>
+              <!-- W2 done -->
+              <div class="flex items-center gap-2 relative pl-1">
+                <div class="hex w-6 h-6 bg-secondary/60 grid place-items-center shrink-0">
+                  <span class="font-mono text-[6px] text-bg font-bold">02</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-mono text-[7px] text-secondary/70">MOD_02 ✓</div>
+                  <div class="font-headline italic text-[11px] text-secondary truncate">Aristoteles</div>
+                </div>
+              </div>
+              <!-- W3 active -->
+              <div class="flex items-center gap-2 relative pl-1">
+                <div class="hex w-7 h-7 bg-primary grid place-items-center shrink-0 animate-pulse" style="box-shadow: 0 0 10px var(--primary);">
+                  <span class="font-mono text-[7px] text-bg font-bold">03</span>
+                </div>
+                <div class="flex-1 min-w-0 p-1.5 bg-primary/10 border border-primary/40">
+                  <div class="font-mono text-[7px] text-primary">◈ LIVE_MODULE</div>
+                  <div class="font-headline italic text-[12px] text-primary font-bold truncate">Descartes</div>
+                </div>
+              </div>
+              <!-- W4-8 locked -->
+              <div class="flex items-center gap-2 opacity-50 pl-1">
+                <div class="hex w-6 h-6 bg-outline/40 grid place-items-center shrink-0">
+                  <span class="font-mono text-[6px] text-text-dim font-bold">04</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-mono text-[7px] text-text-dim">MOD_04 🔒</div>
+                  <div class="font-headline italic text-[11px] text-text-dim truncate">Spinoza</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 opacity-30 pl-1">
+                <div class="hex w-6 h-6 bg-outline/40 grid place-items-center shrink-0">
+                  <span class="font-mono text-[6px] text-text-dim font-bold">05</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-mono text-[7px] text-text-dim">MOD_05 🔒</div>
+                  <div class="font-headline italic text-[11px] text-text-dim truncate">Locke</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Caption -->
+          <div class="p-5">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-primary mb-1">EKRAN_01</div>
+            <h3 class="font-headline italic text-2xl mb-2">Yol Haritası</h3>
+            <p class="text-text-dim text-sm leading-relaxed">
+              Hangi haftada olduğunu, neyi tamamladığını ve sıradaki filozofu bir bakışta görürsün.
+              Tamamladığın haftalara geri dönüp notlarına bakabilirsin.
+            </p>
+          </div>
+        </article>
+
+        <!-- ─────── 2) HAFTANIN SORUSU & MEKTUP ─────── -->
+        <article class="glass tech-notch overflow-hidden lift">
+          <div class="aspect-[3/4] bg-gradient-to-b from-bg via-surface/50 to-bg p-4 border-b border-outline/20 relative overflow-hidden">
+            <!-- TopBar -->
+            <div class="flex items-center justify-between mb-3 pb-2 border-b border-outline/20">
+              <div class="flex items-center gap-1.5">
+                <span class="w-1 h-1 bg-primary rounded-full"></span>
+                <span class="font-mono text-[7px] tracking-[0.3em] text-primary">NEOAGORA</span>
+              </div>
+              <span class="font-mono text-[7px] text-secondary">● SALI 18:00 AÇILDI</span>
+            </div>
+            <!-- Hero başlık -->
+            <h4 class="font-headline italic text-xl text-primary mb-1">Hakikatin</h4>
+            <h4 class="font-headline italic text-xl text-text mb-3">Yankıları</h4>
+            <!-- Soru kartı -->
+            <div class="bg-surface-2/40 border border-outline/30 p-3 tech-notch mb-3">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-outline/30">
+                <span class="font-mono text-[7px] text-primary/70 tracking-widest">ARŞİV · 04-2026</span>
+                <span class="font-mono text-[7px] text-secondary tracking-widest">HAFTA SORULARI</span>
+              </div>
+              <div class="font-mono text-[7px] text-primary/60 mb-1">MOD_03 · RASYONALİZM</div>
+              <div class="font-headline italic text-base text-primary mb-2">René Descartes</div>
+              <ol class="space-y-2">
+                <li class="text-[10px] leading-relaxed">
+                  <span class="text-primary/70 font-mono mr-1">01.</span>
+                  <span class="font-headline italic text-text">Her şeyden şüphe ettiğinde geriye ne kalıyor?</span>
+                </li>
+                <li class="text-[10px] leading-relaxed">
+                  <span class="text-primary/70 font-mono mr-1">02.</span>
+                  <span class="font-headline italic text-text-dim">Düşünmek, var olmanın kanıtı mıdır?</span>
+                </li>
+                <li class="text-[10px] leading-relaxed opacity-60">
+                  <span class="text-primary/70 font-mono mr-1">03.</span>
+                  <span class="font-headline italic text-text-dim">Rüyada gördüğün ile uyanıkkenkini nasıl ayırırsın?</span>
+                </li>
+              </ol>
+            </div>
+            <!-- Letter form -->
+            <div class="border border-primary/30 p-2 tech-notch">
+              <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="font-mono text-[7px] text-primary tracking-widest">MEKTUBUNU YAZ →</span>
+              </div>
+              <div class="bg-bg/60 p-1.5 text-[8px] text-text-dim leading-relaxed italic">
+                "Bütün varsayımları çıkardım. Geriye bir kuşku kaldı, kuşkunun da bir sahibi..."
+                <span class="inline-block w-1 h-2 bg-primary ml-0.5 animate-pulse"></span>
+              </div>
+            </div>
+          </div>
+          <div class="p-5">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-primary mb-1">EKRAN_02</div>
+            <h3 class="font-headline italic text-2xl mb-2">Haftanın Sorusu</h3>
+            <p class="text-text-dim text-sm leading-relaxed">
+              Salı 18:00'de açılır, Cumartesi 14:00'a kadar açık kalır. İçerideki mektup alanına
+              cevabını yazarsın — atölyede o mektubun üzerinden konuşuruz.
+            </p>
+          </div>
+        </article>
+
+        <!-- ─────── 3) AI ULAK / CHAT ─────── -->
+        <article class="glass tech-notch overflow-hidden lift">
+          <div class="aspect-[3/4] bg-gradient-to-b from-bg via-surface/50 to-bg p-4 border-b border-outline/20 relative overflow-hidden">
+            <!-- Header chip -->
+            <div class="flex items-center justify-between mb-3 pb-2 border-b border-outline/20">
+              <div class="flex items-center gap-1.5">
+                <div class="hex w-5 h-5 bg-primary/30 grid place-items-center">
+                  <span class="font-headline italic text-[8px] text-primary font-bold">D</span>
+                </div>
+                <div>
+                  <div class="font-mono text-[7px] text-primary leading-none">DESCARTES</div>
+                  <div class="font-mono text-[6px] text-secondary leading-none mt-0.5">● ONLINE</div>
+                </div>
+              </div>
+              <span class="font-mono text-[7px] text-text-dim">ULAK_v3</span>
+            </div>
+            <!-- Messages -->
+            <div class="space-y-2.5">
+              <!-- AI greeting -->
+              <div class="flex gap-1.5 items-start">
+                <div class="hex w-4 h-4 bg-primary/40 shrink-0 mt-0.5"></div>
+                <div class="flex-1">
+                  <div class="bg-surface-2/60 p-2 tech-notch text-[9px] leading-relaxed">
+                    Hoş geldin. Bu hafta birlikte düşüneceğimiz soru:
+                    <span class="text-primary">"Düşünüyorum, öyleyse var mıyım?"</span>
+                  </div>
+                </div>
+              </div>
+              <!-- User -->
+              <div class="flex justify-end">
+                <div class="bg-primary/15 border border-primary/30 p-2 tech-notch text-[9px] leading-relaxed max-w-[85%]">
+                  Düşünmeyi bilmediğim anlarda ne oluyor o zaman?
+                </div>
+              </div>
+              <!-- AI response -->
+              <div class="flex gap-1.5 items-start">
+                <div class="hex w-4 h-4 bg-primary/40 shrink-0 mt-0.5"></div>
+                <div class="flex-1">
+                  <div class="bg-surface-2/60 p-2 tech-notch text-[9px] leading-relaxed">
+                    Güzel bir soru. Belki "düşünmüyorum" diyebilmen için bile düşünmen gerekiyor —
+                    yani şüphe etmek, kuşku duymak da bir tür düşünmektir.
+                  </div>
+                </div>
+              </div>
+              <!-- User typing -->
+              <div class="flex justify-end opacity-70">
+                <div class="bg-primary/10 border border-primary/30 p-2 tech-notch text-[9px] leading-relaxed">
+                  <span class="inline-block w-1 h-1 bg-primary rounded-full animate-pulse mr-0.5"></span>
+                  <span class="inline-block w-1 h-1 bg-primary rounded-full animate-pulse mr-0.5" style="animation-delay: 0.2s"></span>
+                  <span class="inline-block w-1 h-1 bg-primary rounded-full animate-pulse" style="animation-delay: 0.4s"></span>
+                </div>
+              </div>
+            </div>
+            <!-- Input bar -->
+            <div class="absolute bottom-3 left-3 right-3 flex gap-1.5 items-center bg-bg border border-outline/40 p-1.5">
+              <div class="flex-1 text-[8px] text-text-dim italic">Bir şeyler yaz...</div>
+              <div class="w-5 h-5 bg-primary grid place-items-center">
+                <span class="text-[8px] text-bg font-bold">→</span>
+              </div>
+            </div>
+          </div>
+          <div class="p-5">
+            <div class="font-mono text-[10px] uppercase tracking-widest text-primary mb-1">EKRAN_03</div>
+            <h3 class="font-headline italic text-2xl mb-2">Dijital Ulak</h3>
+            <p class="text-text-dim text-sm leading-relaxed">
+              Yapay zekâ destekli filozof yardımcısı. Haftanın filozofuyla 7/24 sohbet edebilir,
+              mektubunu yazarken takıldığında akıl danışabilirsin. Atölye sonrası da yanında.
+            </p>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Alt bilgi -->
+      <div class="mt-12 grid md:grid-cols-3 gap-4">
+        <div class="flex items-start gap-3">
+          <span class="text-primary mt-0.5 text-xl">✦</span>
+          <p class="text-sm text-text-dim leading-relaxed">
+            <span class="text-text">Mektupların kişisel.</span> Sadece sen ve eğitmen görür.
+          </p>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="text-secondary mt-0.5 text-xl">✦</span>
+          <p class="text-sm text-text-dim leading-relaxed">
+            <span class="text-text">Telefondan açılır.</span> İndirme yok, link ile giriş.
+          </p>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="text-tertiary mt-0.5 text-xl">✦</span>
+          <p class="text-sm text-text-dim leading-relaxed">
+            <span class="text-text">8 hafta sonrası açık.</span> Arşiv senin, kaybolmaz.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       KİMLER İÇİN?
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="kim" class="py-24 scroll-mt-20">
+    <div class="max-w-6xl mx-auto px-5">
+      <div class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/70 mb-4">
+        // 05 — KİMLER İÇİN?
+      </div>
+      <h2 class="font-headline italic text-4xl md:text-6xl leading-tight mb-12">
+        Ön bilgi gerekmiyor.<br />
+        <span class="text-text-dim">Merak yetiyor.</span>
+      </h2>
+
+      <div class="grid md:grid-cols-3 gap-5">
+        <div class="glass tech-notch p-6 lift">
+          <div class="font-mono text-[10px] uppercase tracking-widest text-primary mb-3">PROFİL_01</div>
+          <h3 class="font-headline italic text-2xl mb-3">Liseli &amp; Üniversiteli</h3>
+          <p class="text-text-dim text-sm leading-relaxed">
+            Felsefe dersi sınav konusu olmaktan çıksın istiyorsan — gerçek soruyla tanış.
+          </p>
+        </div>
+        <div class="glass tech-notch p-6 lift">
+          <div class="font-mono text-[10px] uppercase tracking-widest text-primary mb-3">PROFİL_02</div>
+          <h3 class="font-headline italic text-2xl mb-3">"Düşünmeyi unuttum" diyenler</h3>
+          <p class="text-text-dim text-sm leading-relaxed">
+            Otomatik pilotta yaşamaktan sıkılan, kafayı yeniden çalıştırmak isteyen yetişkin.
+          </p>
+        </div>
+        <div class="glass tech-notch p-6 lift">
+          <div class="font-mono text-[10px] uppercase tracking-widest text-primary mb-3">PROFİL_03</div>
+          <h3 class="font-headline italic text-2xl mb-3">Felsefe romanı meraklıları</h3>
+          <p class="text-text-dim text-sm leading-relaxed">
+            Felsefeyi bir hikâye içinde okumuş, "şimdi ne yapacağım?" diye soran herkes — devamı burada.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       YATIRIM
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="yatirim" class="py-24 bg-surface/30 border-y border-outline/30 scroll-mt-20">
+    <div class="max-w-3xl mx-auto px-5">
+      <div class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/70 mb-4 text-center">
+        // 06 — YATIRIM
+      </div>
+      <h2 class="font-headline italic text-4xl md:text-5xl leading-tight text-center mb-12">
+        Tek fiyat. Tüm program.
+      </h2>
+
+      <div class="glass tech-notch p-8 md:p-12 text-center neon-cyan-soft border-primary/40">
+        <div class="font-mono text-[11px] uppercase tracking-[0.3em] text-text-dim mb-2">
+          NEOAGORA · PROGRAM_A · 8 HAFTA
+        </div>
+        <div class="my-6">
+          <span class="stat-num text-7xl text-primary neon-text" id="price-display">—</span>
+          <span class="text-2xl text-text-dim ml-2 align-top">TL</span>
+          <div class="font-mono text-[10px] text-text-dim mt-2 tracking-wider">
+            * fiyat sabittir, tüm 8 hafta dahildir
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-3 mt-8 text-left">
+          <div class="flex items-start gap-3">
+            <span class="text-secondary mt-0.5">✓</span>
+            <span class="text-sm">8 canlı atölye (Cumartesi 14:00 — 16:00)</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-secondary mt-0.5">✓</span>
+            <span class="text-sm">Hibrit katılım — online veya fiziksel</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-secondary mt-0.5">✓</span>
+            <span class="text-sm">Haftalık kişisel mektup geri dönüşü</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-secondary mt-0.5">✓</span>
+            <span class="text-sm">7/24 AI Ulak — dijital tartışma arkadaşı</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-secondary mt-0.5">✓</span>
+            <span class="text-sm">Atölye dışı okuma listesi &amp; kaynaklar</span>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-secondary mt-0.5">✓</span>
+            <span class="text-sm">Tamamlama mektubu (sertifika değil — daha samimi)</span>
+          </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-outline/40 text-text-dim text-sm">
+          Kayıt formunu doldurduktan sonra <span class="text-text">IBAN bilgileri ve ödeme talimatları</span>
+          e-posta ile gönderilir. Ön rezervasyon için fatura yok — yer kapanır.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       KAYIT FORMU
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="kayit" class="py-24 md:py-32 relative scroll-mt-20">
+    <div class="max-w-2xl mx-auto px-5">
+      <div class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/70 mb-4">
+        // 07 — KAYIT FORMU
+      </div>
+      <h2 class="font-headline italic text-4xl md:text-6xl leading-tight mb-3">
+        Yerini ayırt.
+      </h2>
+      <p class="text-text-dim text-lg mb-10">
+        Bilgilerini bırak, IBAN ve detaylar e-posta ile gelir. Ortalama 30 saniye sürer.
+      </p>
+
+      <form id="registration-form" class="glass tech-notch p-6 md:p-8 space-y-5" novalidate>
+        <!-- Ad Soyad -->
+        <div>
+          <label for="full_name" class="block font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim mb-2">
+            Ad Soyad <span class="text-danger">*</span>
+          </label>
+          <input
+            id="full_name" name="full_name" type="text" required maxlength="80"
+            placeholder="Sofi Amundsen"
+            class="field w-full px-4 py-3 rounded-sm text-base"
+            autocomplete="name"
+          />
+        </div>
+
+        <!-- E-posta -->
+        <div>
+          <label for="email" class="block font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim mb-2">
+            E-posta <span class="text-danger">*</span>
+          </label>
+          <input
+            id="email" name="email" type="email" required maxlength="120"
+            placeholder="sen@neoagora.com"
+            class="field w-full px-4 py-3 rounded-sm text-base"
+            autocomplete="email"
+          />
+        </div>
+
+        <!-- Telefon -->
+        <div>
+          <label for="phone" class="block font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim mb-2">
+            Telefon <span class="text-danger">*</span>
+          </label>
+          <input
+            id="phone" name="phone" type="tel" required maxlength="25"
+            placeholder="0 5__ ___ __ __"
+            class="field w-full px-4 py-3 rounded-sm text-base"
+            autocomplete="tel"
+          />
+        </div>
+
+        <!-- Yaş + Okul (yan yana) -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="age" class="block font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim mb-2">
+              Yaş <span class="text-danger">*</span>
+            </label>
+            <input
+              id="age" name="age" type="number" required min="12" max="99"
+              placeholder="22"
+              class="field w-full px-4 py-3 rounded-sm text-base"
+            />
+          </div>
+          <div>
+            <label for="school" class="block font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim mb-2">
+              Okul / Meslek <span class="text-danger">*</span>
+            </label>
+            <input
+              id="school" name="school" type="text" required maxlength="80"
+              placeholder="Boğaziçi Ü. — Sosyoloji"
+              class="field w-full px-4 py-3 rounded-sm text-base"
+            />
+          </div>
+        </div>
+
+        <!-- Format tercihi -->
+        <div>
+          <label class="block font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim mb-3">
+            Katılım tercihi <span class="text-danger">*</span>
+          </label>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="format-card">
+              <input id="fmt-online" type="radio" name="format" value="online" required class="sr-only" />
+              <label for="fmt-online" class="block cursor-pointer p-4 border border-outline/50 rounded-sm hover:border-primary/40 transition-colors text-center">
+                <span class="ring-dot inline-block w-2 h-2 rounded-full bg-outline mb-2"></span>
+                <span class="block font-mono text-[10px] uppercase tracking-widest text-text-dim mb-1">FORMAT</span>
+                <span class="block font-headline italic text-base">Online</span>
+              </label>
+            </div>
+            <div class="format-card">
+              <input id="fmt-fiziksel" type="radio" name="format" value="fiziksel" class="sr-only" />
+              <label for="fmt-fiziksel" class="block cursor-pointer p-4 border border-outline/50 rounded-sm hover:border-primary/40 transition-colors text-center">
+                <span class="ring-dot inline-block w-2 h-2 rounded-full bg-outline mb-2"></span>
+                <span class="block font-mono text-[10px] uppercase tracking-widest text-text-dim mb-1">FORMAT</span>
+                <span class="block font-headline italic text-base">Fiziksel</span>
+              </label>
+            </div>
+            <div class="format-card">
+              <input id="fmt-farketmez" type="radio" name="format" value="farketmez" class="sr-only" />
+              <label for="fmt-farketmez" class="block cursor-pointer p-4 border border-outline/50 rounded-sm hover:border-primary/40 transition-colors text-center">
+                <span class="ring-dot inline-block w-2 h-2 rounded-full bg-outline mb-2"></span>
+                <span class="block font-mono text-[10px] uppercase tracking-widest text-text-dim mb-1">FORMAT</span>
+                <span class="block font-headline italic text-base">Farketmez</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kişisel not (opsiyonel) -->
+        <div>
+          <label for="notes" class="block font-mono text-[10px] uppercase tracking-[0.25em] text-text-dim mb-2">
+            Eklemek istediğin bir şey var mı? <span class="text-text-dim">(opsiyonel)</span>
+          </label>
+          <textarea
+            id="notes" name="notes" rows="3" maxlength="500"
+            placeholder="Felsefeye nereden geliyorsun? Ya da bizden beklediğin bir şey..."
+            class="field w-full px-4 py-3 rounded-sm text-sm resize-none"
+          ></textarea>
+        </div>
+
+        <!-- KVKK -->
+        <label class="flex items-start gap-3 text-text-dim text-xs leading-relaxed cursor-pointer">
+          <input id="kvkk" type="checkbox" required class="mt-0.5 accent-primary" />
+          <span>
+            Verilerimin sadece NeoAgora atölyesi iletişimi için kullanılacağını kabul ediyorum.
+            <span class="text-text-dim/70">(spam yok — verdiğimiz tek söz)</span>
+          </span>
+        </label>
+
+        <!-- Submit -->
+        <button type="submit" id="submit-btn" class="cta cta-primary w-full justify-center !py-4 !text-xs">
+          <span id="submit-text">Kaydımı Tamamla</span>
+          <span id="submit-spinner" class="hidden inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+          <span id="submit-arrow" aria-hidden="true">→</span>
+        </button>
+
+        <!-- Status mesajı -->
+        <div id="status-msg" class="hidden p-4 border tech-notch text-sm"></div>
+      </form>
+
+      <p class="text-center text-text-dim/70 text-xs mt-6 font-mono tracking-wide">
+        // SUBMIT BAŞARILI OLDUĞUNDA E-POSTA ADRESİNE TEYİT MESAJI GİDER //
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SSS
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="sss" class="py-24 bg-surface/30 border-t border-outline/30 scroll-mt-20">
+    <div class="max-w-3xl mx-auto px-5">
+      <div class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/70 mb-4">
+        // 08 — SIK SORULAN SORULAR
+      </div>
+      <h2 class="font-headline italic text-4xl md:text-5xl leading-tight mb-10">
+        Aklındakiler.
+      </h2>
+
+      <div class="space-y-3">
+        <details class="glass tech-notch p-5 group">
+          <summary class="cursor-pointer font-headline italic text-xl flex justify-between items-center">
+            Felsefe altyapım sıfır, anlayabilir miyim?
+            <span class="text-primary text-2xl group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-text-dim text-base leading-relaxed">
+            Evet — atölyenin tüm tasarımı sıfırdan biri için. Hiçbir hafta "ön okuma" istemiyor;
+            aksine, atölye bittikten sonra okumanı tetiklemek için tasarlandı.
+          </p>
+        </details>
+
+        <details class="glass tech-notch p-5 group">
+          <summary class="cursor-pointer font-headline italic text-xl flex justify-between items-center">
+            Online ile fiziksel arasındaki fark ne?
+            <span class="text-primary text-2xl group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-text-dim text-base leading-relaxed">
+            İçerik aynı; deneyim farklı. Online katılımcılar Zoom üzerinden gerçek zamanlı bağlanır,
+            mektup gönderimi e-postayla olur. Fiziksel grup belirlenen mekânda buluşur — ortak masa, kahve,
+            sıcak diyalog. Form'da seçimini yaparsın, hibrit gruplar haftadan haftaya sabit kalır.
+          </p>
+        </details>
+
+        <details class="glass tech-notch p-5 group">
+          <summary class="cursor-pointer font-headline italic text-xl flex justify-between items-center">
+            Bir hafta katılamazsam ne olur?
+            <span class="text-primary text-2xl group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-text-dim text-base leading-relaxed">
+            Her atölye kayıt altına alınır; kaçırdığın haftayı en geç 3 gün içinde izleyebilirsin.
+            Mektup ödevini de o haftaya yetiştirebilirsen geri dönüş kaybolmaz.
+          </p>
+        </details>
+
+        <details class="glass tech-notch p-5 group">
+          <summary class="cursor-pointer font-headline italic text-xl flex justify-between items-center">
+            Kayıt sonrası ödemeyi nasıl yapacağım?
+            <span class="text-primary text-2xl group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-text-dim text-base leading-relaxed">
+            Formu doldurduktan sonra IBAN bilgileri ve adına düzenlenmiş bir teyit mesajı e-postana gelir.
+            Havale 48 saat içinde tamamlanırsa yerin kesinleşir. Aksi halde sıradaki kişiye geçer.
+          </p>
+        </details>
+
+        <details class="glass tech-notch p-5 group">
+          <summary class="cursor-pointer font-headline italic text-xl flex justify-between items-center">
+            Sertifika veriliyor mu?
+            <span class="text-primary text-2xl group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-text-dim text-base leading-relaxed">
+            Klasik anlamda hayır — bunu kasten yapmıyoruz. Onun yerine her katılımcıya 8 haftanın sonunda
+            "tamamlama mektubu" diyoruz: kişisel, isminle, sürecin notlarıyla yazılmış. Daha sahici.
+          </p>
+        </details>
+
+        <details class="glass tech-notch p-5 group">
+          <summary class="cursor-pointer font-headline italic text-xl flex justify-between items-center">
+            Yaş sınırı var mı?
+            <span class="text-primary text-2xl group-open:rotate-45 transition-transform">+</span>
+          </summary>
+          <p class="mt-3 text-text-dim text-base leading-relaxed">
+            Alt sınır 14 — Sofi'nin yaşı. Üst sınır yok. Geçen sezon en küçüğümüz 15, en büyüğümüz 67'ydi
+            ve bu çeşitlilik atölyenin en güzel yanlarından biriydi.
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FİNAL CTA
+       ═══════════════════════════════════════════════════════════════ -->
+  <section class="py-24">
+    <div class="max-w-3xl mx-auto px-5 text-center">
+      <div class="font-mono text-[10px] uppercase tracking-[0.4em] text-primary/70 mb-4">
+        // SON BAĞLANTI
+      </div>
+      <h2 class="font-headline italic text-4xl md:text-6xl leading-tight mb-10">
+        Mağaranın çıkışı burada.
+      </h2>
+      <a href="#kayit" class="cta cta-primary !text-sm !px-8 !py-5">
+        Kayıt Formuna Git
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════ -->
+  <footer class="border-t border-outline/30 py-10 mt-10">
+    <div class="max-w-6xl mx-auto px-5 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+        <span class="font-mono text-[10px] tracking-[0.3em] text-primary">NEOAGORA</span>
+        <span class="font-mono text-[10px] text-text-dim">© 2026</span>
+      </div>
+      <div class="flex items-center gap-5 font-mono text-[10px] uppercase tracking-widest text-text-dim">
+        <a href="mailto:iletisim@neoagora.com" class="hover:text-primary">iletisim@neoagora.com</a>
+        <span class="opacity-30">·</span>
+        <a href="https://instagram.com/neoagora" target="_blank" rel="noreferrer" class="hover:text-primary">Instagram</a>
+        <span class="opacity-30">·</span>
+        <span>ATHENS_NODE · 2026</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCRIPT — Form submit + Supabase
+       ═══════════════════════════════════════════════════════════════ -->
+  <script>
+    /* ────────────────────────────────────────────────────────────────
+       SUPABASE BAĞLANTISI — Buraya kendi anahtarlarını yapıştır.
+       neoagora-app/.env.local'de zaten var, oradan kopyala:
+         NEXT_PUBLIC_SUPABASE_URL      → SUPABASE_URL
+         NEXT_PUBLIC_SUPABASE_ANON_KEY → SUPABASE_ANON_KEY
+
+       UYARI: Bu anahtarlar zaten public (anon) — sızdırma riski yok.
+       Ama RLS politikalarının doğru kurulu olduğundan emin ol
+       (migrations/0002_registrations.sql).
+       ──────────────────────────────────────────────────────────────── */
+    const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY-HERE';
+
+    /* ────────────────────────────────────────────────────────────────
+       FİYAT — Buraya yazınca yukarıda otomatik gözükür.
+       ──────────────────────────────────────────────────────────────── */
+    const PRICE_TL = '—'; // örn. '2.400'
+
+    document.getElementById('price-display').textContent = PRICE_TL;
+
+    /* ────────────────────────────────────────────────────────────────
+       FİLOZOF CAROUSEL — 8 filozof, döngüsel
+       ──────────────────────────────────────────────────────────────── */
+    const PHILOSOPHERS = [
+      { id: 'platon',      name: 'Platon',          era: 'Antik',        dates: 'İÖ 427–347',  concept: 'İdealar Kuramı',           week: 1, quote: 'Karanlıktan korkan bir çocuğu kolayca affedebiliriz; hayattaki gerçek trajedi, yetişkinlerin ışıktan korkmasıdır.' },
+      { id: 'aristoteles', name: 'Aristoteles',     era: 'Antik',        dates: 'İÖ 384–322',  concept: 'Altın Orta & Teleoloji',   week: 2, quote: 'Kendini bilmek tüm bilgeliğin başlangıcıdır.' },
+      { id: 'descartes',   name: 'René Descartes',  era: 'Rasyonalizm',  dates: '1596–1650',   concept: 'Cogito Ergo Sum',          week: 3, quote: 'Düşünüyorum, öyleyse varım.' },
+      { id: 'spinoza',     name: 'Baruch Spinoza',  era: 'Panteizm',     dates: '1632–1677',   concept: 'Tek Töz / Panteizm',       week: 4, quote: 'Sonsuzluğun bakış açısından bakmak — sub specie aeternitatis.' },
+      { id: 'locke',       name: 'John Locke',      era: 'Empirizm',     dates: '1632–1704',   concept: 'Tabula Rasa',              week: 5, quote: 'Zihin, deneyimle yazılmaya bekleyen boş bir levhadır.' },
+      { id: 'hume',        name: 'David Hume',      era: 'Empirizm',     dates: '1711–1776',   concept: 'Alışkanlık & Nedensellik', week: 6, quote: 'Akıl, tutkuların kölesidir ve kölesi olmaktan başka bir şey iddia edemez.' },
+      { id: 'berkeley',    name: 'George Berkeley', era: 'İdealizm',     dates: '1685–1753',   concept: 'Esse est percipi',         week: 7, quote: 'Var olmak, algılanmaktır.' },
+      { id: 'kant',        name: 'Immanuel Kant',   era: 'Aydınlanma',   dates: '1724–1804',   concept: 'Kategorik İmperatif',      week: 8, quote: 'Aydınlanma; insanın kendi suçuyla düşmüş olduğu bir ergin olmama durumundan kurtulmasıdır.' },
+    ];
+
+    let philIndex = 0;
+    const philPhoto   = document.getElementById('phil-photo');
+    const philEra     = document.getElementById('phil-era');
+    const philName    = document.getElementById('phil-name');
+    const philName2   = document.getElementById('phil-name-2');
+    const philMeta    = document.getElementById('phil-meta');
+    const philQuote   = document.getElementById('phil-quote');
+    const philWeek    = document.getElementById('phil-week');
+    const philCounter = document.getElementById('phil-counter');
+
+    function renderPhilosopher(animate = true) {
+      const p = PHILOSOPHERS[philIndex];
+      if (animate) philPhoto.style.opacity = '0';
+      setTimeout(() => {
+        philPhoto.src = `philosophers/${p.id}.png`;
+        philPhoto.alt = p.name;
+        philPhoto.style.opacity = '1';
+        philEra.textContent = p.era.toUpperCase();
+        philName.textContent = p.name;
+        philName2.textContent = p.name;
+        philMeta.textContent = `${p.dates} · ${p.concept}`;
+        philQuote.textContent = p.quote;
+        philWeek.textContent = `MOD_${String(p.week).padStart(2, '0')}`;
+        philCounter.textContent = `${String(philIndex + 1).padStart(2, '0')} / ${String(PHILOSOPHERS.length).padStart(2, '0')}`;
+      }, animate ? 200 : 0);
+    }
+
+    function nextPhilosopher() {
+      philIndex = (philIndex + 1) % PHILOSOPHERS.length;
+      renderPhilosopher();
+    }
+    function prevPhilosopher() {
+      philIndex = (philIndex - 1 + PHILOSOPHERS.length) % PHILOSOPHERS.length;
+      renderPhilosopher();
+    }
+
+    const btnNext = document.getElementById('phil-next');
+    const btnPrev = document.getElementById('phil-prev');
+    btnNext.addEventListener('click', nextPhilosopher);
+    btnPrev.addEventListener('click', prevPhilosopher);
+
+    // Klavye desteği — ok tuşlarıyla da gezilebilsin
+    document.addEventListener('keydown', (e) => {
+      // Form alanlarındayken tetiklenmesin
+      if (e.target.matches('input, textarea, select')) return;
+      if (e.key === 'ArrowRight') nextPhilosopher();
+      else if (e.key === 'ArrowLeft') prevPhilosopher();
+    });
+
+    // Otomatik döngü — her 6 saniyede bir ileri git
+    let autoCycle = setInterval(nextPhilosopher, 6000);
+    // Kullanıcı butona basınca timer'ı sıfırla
+    [btnNext, btnPrev].forEach((btn) => {
+      btn.addEventListener('click', () => {
+        clearInterval(autoCycle);
+        autoCycle = setInterval(nextPhilosopher, 6000);
+      });
+    });
+
+    renderPhilosopher(false);
+
+    /* ────────────────────────────────────────────────────────────────
+       FORM SUBMIT
+       ──────────────────────────────────────────────────────────────── */
+    const form = document.getElementById('registration-form');
+    const statusBox = document.getElementById('status-msg');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const submitArrow = document.getElementById('submit-arrow');
+
+    function showStatus(type, message) {
+      statusBox.classList.remove('hidden', 'status-ok', 'status-err');
+      statusBox.classList.add(type === 'ok' ? 'status-ok' : 'status-err');
+      statusBox.textContent = message;
+    }
+
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      submitText.textContent = loading ? 'Gönderiliyor...' : 'Kaydımı Tamamla';
+      submitSpinner.classList.toggle('hidden', !loading);
+      submitArrow.classList.toggle('hidden', loading);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Native validity check
+      if (!form.checkValidity()) {
+        showStatus('err', 'Lütfen tüm zorunlu alanları doldur.');
+        form.reportValidity();
+        return;
+      }
+
+      const data = {
+        full_name: form.full_name.value.trim(),
+        email: form.email.value.trim().toLowerCase(),
+        phone: form.phone.value.trim(),
+        age: parseInt(form.age.value, 10),
+        school: form.school.value.trim(),
+        format_preference: form.format.value,
+        notes: form.notes.value.trim() || null,
+      };
+
+      // Supabase yapılandırma kontrolü
+      if (SUPABASE_URL.includes('YOUR-PROJECT') || SUPABASE_ANON_KEY.includes('YOUR-ANON-KEY')) {
+        showStatus('err', 'Site henüz Supabase\'e bağlanmadı. (index.html üst satırlarındaki SUPABASE_URL ve SUPABASE_ANON_KEY\'i doldur.)');
+        return;
+      }
+
+      setLoading(true);
+      statusBox.classList.add('hidden');
+
+      try {
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { error } = await supabase.from('registrations').insert([data]);
+
+        if (error) {
+          // Email unique constraint çakışması mı?
+          if (error.code === '23505' || /duplicate/i.test(error.message)) {
+            showStatus('err', 'Bu e-posta ile zaten bir kayıt var. Aynı adresle tekrar denersen üzerine yazmaz — başka adres dene ya da iletişim kanallarından bize ulaş.');
+          } else {
+            showStatus('err', 'Beklenmedik bir hata oldu: ' + (error.message || 'unknown'));
+            console.error(error);
+          }
+          setLoading(false);
+          return;
+        }
+
+        // Başarılı — formu temizle, teşekkür mesajı göster
+        form.reset();
+        showStatus('ok',
+          '✓ Kaydın alındı! 24 saat içinde IBAN bilgileri ve detaylar e-postana gelecek. ' +
+          'Spam klasörünü de kontrol etmeyi unutma.'
+        );
+        // Formu kapat, sadece teşekkür kalsın
+        form.style.opacity = '0.4';
+        form.style.pointerEvents = 'none';
+        statusBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (err) {
+        console.error(err);
+        showStatus('err', 'Sunucuya ulaşamadık. İnternet bağlantını kontrol et ve tekrar dene.');
+        setLoading(false);
+      }
+    });
+
+    /* Smooth scroll ile gelen anchor'lar nav'ın altına çarpmasın */
+    document.querySelectorAll('a[href^="#"]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          const top = target.getBoundingClientRect().top + window.scrollY - 64;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
