@@ -75,6 +75,33 @@ create policy "Kayıt sahibi kendi kaydını görebilir"
 --      Bir admin paneli yapacaksan service_role key kullan.
 
 -- ════════════════════════════════════════════════════════════════════════
+-- İLETİŞİM TABLOSU — landing'in altındaki "Aklına takılan bir şey mi var?"
+-- formundan gelen mesajlar buraya düşer.
+-- ════════════════════════════════════════════════════════════════════════
+
+create table if not exists public.inquiries (
+  id          uuid primary key default gen_random_uuid(),
+  email       text not null check (email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
+  message     text not null check (length(message) between 5 and 1000),
+  status      text not null default 'new' check (status in ('new', 'replied', 'spam')),
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists inquiries_created_at_idx on public.inquiries (created_at desc);
+create index if not exists inquiries_status_idx     on public.inquiries (status);
+
+alter table public.inquiries enable row level security;
+
+drop policy if exists "Anonim soru gönderebilir" on public.inquiries;
+create policy "Anonim soru gönderebilir"
+  on public.inquiries
+  for insert
+  to anon
+  with check (true);
+
+-- Anon hiçbir şey okuyamaz, sadece insert. Sen Dashboard'tan görürsün.
+
+-- ════════════════════════════════════════════════════════════════════════
 -- TEST — Bu SQL'i ekledikten sonra terminalden / browser'dan deneyebilirsin:
 --
 -- insert into public.registrations
@@ -82,5 +109,9 @@ create policy "Kayıt sahibi kendi kaydını görebilir"
 -- values
 --   ('Test Kayıt', 'test@example.com', '05551234567', 25, 'Test Üniv.', 'online');
 --
+-- insert into public.inquiries (email, message)
+-- values ('test@example.com', 'Bu bir deneme sorusudur.');
+--
 -- select count(*) from public.registrations;  -- Service role: 1, anon: 0
+-- select count(*) from public.inquiries;
 -- ════════════════════════════════════════════════════════════════════════
