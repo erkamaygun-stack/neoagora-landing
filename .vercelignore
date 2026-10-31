@@ -1,0 +1,6 @@
+*.bak
+**/*.sql
+README.md
+.env*
+__pycache__/
+test_*.py
