@@ -1,0 +1,4 @@
+# Yayına çıkmaması gereken depo dosyaları
+supabase-migration.sql
+README.md
+*.bak
